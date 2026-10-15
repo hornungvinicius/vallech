@@ -440,8 +440,8 @@
   const mm = gsap.matchMedia();
   mm.add('(min-width: 768px)', () => {
     // Parallax suave entre camadas
-    gsap.to('.std-portrait', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.std', start: 'top bottom', end: 'bottom top', scrub: true } });
-    gsap.to('.std-detail', { yPercent: -22, ease: 'none', scrollTrigger: { trigger: '.std', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.to('.std-detail', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.std', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.to('.std-portrait', { yPercent: -14, ease: 'none', scrollTrigger: { trigger: '.std', start: 'top bottom', end: 'bottom top', scrub: true } });
 
     // Esconde o topo ao descer, mostra ao subir
     ScrollTrigger.create({

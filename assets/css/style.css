@@ -225,13 +225,13 @@ figcaption, .rail p {
   font-family: var(--f-display);
   font-weight: 300;
   text-transform: uppercase;
-  font-size: clamp(2.15rem, 0.9rem + 5.2vw, 6rem);
+  font-size: clamp(1.85rem, 0.55rem + 4.5vw, 5rem);
   line-height: 1.02;
   letter-spacing: 0.01em;
 }
 .hero-title .line { display: block; padding-bottom: 0.04em; }
 .hero-title .line-in { display: block; }
-.hero-title em { font-style: normal; color: var(--red); }
+.hero-title em, .hero-sub em { font-style: normal; color: var(--red); }
 .hero-foot {
   display: flex;
   align-items: flex-end;
@@ -275,12 +275,13 @@ figcaption, .rail p {
   font-size: clamp(2rem, 1.2rem + 2.4vw, 3.4rem);
   line-height: 1;
   white-space: nowrap;
+  color: var(--red);
 }
 .std-facts dd { margin-top: 10px; color: var(--muted); font-size: 0.9375rem; }
-.std-portrait { grid-column: 8 / span 5; grid-row: 1 / span 2; }
-.std-portrait img { width: 100%; aspect-ratio: 3 / 4.2; object-fit: cover; object-position: 50% 30%; }
-.std-detail { grid-column: 6 / span 3; grid-row: 2; align-self: end; margin-bottom: clamp(-140px, -8vw, -48px); position: relative; z-index: 1; }
-.std-detail img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.std-portrait { grid-column: 6 / span 3; grid-row: 2; align-self: end; margin-bottom: clamp(-110px, -6vw, -36px); position: relative; z-index: 1; }
+.std-portrait img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; object-position: 8% 100%; }
+.std-detail { grid-column: 8 / span 5; grid-row: 1 / span 2; align-self: start; margin-bottom: 0; }
+.std-detail img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 55% 58%; }
 
 /* ---------- 03 Índice de serviços ---------- */
 .idx { padding-block: var(--section) calc(var(--section) * 0.8); }
@@ -470,7 +471,7 @@ figcaption, .rail p {
   font-family: var(--f-display);
   font-weight: 700;
   text-transform: uppercase;
-  font-size: clamp(3.4rem, 13.2vw, 15rem);
+  font-size: clamp(3rem, 10.2vw, 11.5rem);
   line-height: 0.9;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -721,8 +722,8 @@ figcaption, .rail p {
   .top-menu { display: inline-flex; }
 
   .std-text { grid-column: 1 / -1; grid-row: 1; padding-top: 0; }
-  .std-portrait { grid-column: 3 / -1; grid-row: 2; }
-  .std-detail { grid-column: 1 / span 5; grid-row: 2; align-self: end; margin-bottom: -48px; z-index: 1; }
+  .std-detail { grid-column: 4 / -1; grid-row: 2; align-self: start; margin-bottom: 0; z-index: 0; }
+  .std-portrait { grid-column: 1 / span 5; grid-row: 2; align-self: end; margin-bottom: -48px; z-index: 1; }
 
   .idx-list { grid-column: 1 / -1; }
   .idx-title { grid-column: 1 / -1; }
@@ -778,8 +779,9 @@ figcaption, .rail p {
   .hero-actions .btn-red { display: none; } /* o dock já carrega o WhatsApp */
 
   .std-grid, .idx-grid, .bs-sticky, .tr-grid, .pr-grid { column-gap: 12px; }
-  .std-portrait { grid-column: 4 / -1; }
-  .std-detail { grid-column: 1 / span 6; margin-bottom: -32px; }
+  .std-detail { grid-column: 5 / -1; margin-bottom: 0; }
+  .std-portrait { grid-column: 1 / span 6; margin-bottom: -32px; }
+  .std-portrait img { object-position: 14% 100%; }
   .std-detail figcaption { display: none; }
   .std-facts { gap: 40px; }
 
@@ -797,7 +799,7 @@ figcaption, .rail p {
   .has-motion .bs-meter { margin-top: 18px; gap: 10px; }
   .bs-meter-label { letter-spacing: 0.08em; }
 
-  .trucks-mark { font-size: clamp(2.8rem, 15.5vw, 6rem); line-height: 0.95; }
+  .trucks-mark { font-size: clamp(2.3rem, 12.2vw, 4.4rem); line-height: 0.95; }
   .trucks-mark [data-drift] > span { display: block; }
   .tr-grid { grid-template-columns: 1fr; margin-top: 24px; row-gap: 28px; }
   .tr-main { grid-column: 1; grid-row: 1; }
