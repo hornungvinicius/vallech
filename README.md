@@ -5,10 +5,10 @@ Site estático (HTML, CSS e JS puros, GSAP 3.13 + ScrollTrigger copiados para `a
 Para ver localmente:
 
 ```bash
-cd site && python -m http.server 5173
+python -m http.server 5173
 ```
 
-Para publicar, basta subir a pasta `site/` em qualquer hospedagem estática.
+Publicado na Vercel direto deste repositório (preset **Other**, sem build command, output = raiz). Todo push na `main` gera deploy automático.
 
 ## Fontes
 - Kycron (display, arquivo enviado pelo cliente/agência). Confirmar se a licença cobre uso web.

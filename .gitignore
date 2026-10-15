@@ -1,0 +1,11 @@
+# Sistema / Google Drive
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# Compactados (os assets vao descompactados)
+*.rar
+*.zip
+
+# Vercel
+.vercel
