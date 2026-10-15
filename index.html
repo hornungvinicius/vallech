@@ -22,7 +22,13 @@
   // Motion só entra quando o visitante não pediu menos movimento. Se o GSAP não iniciar em 3s, o conteúdo aparece mesmo assim.
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.documentElement.classList.add('motion');
-    setTimeout(function () { if (!window.__vallechMotion) document.documentElement.classList.remove('motion'); }, 3000);
+    document.documentElement.classList.add('has-motion');
+    setTimeout(function () {
+      if (!window.__vallechMotion) {
+        document.documentElement.classList.remove('motion');
+        document.documentElement.classList.remove('has-motion');
+      }
+    }, 3000);
   }
 </script>
 <script type="application/ld+json">
@@ -165,21 +171,31 @@
     </div>
   </section>
 
-  <!-- 04 Funilaria e pintura -->
+  <!-- 04 Funilaria e pintura: o scroll leva a foto da chegada até o reparo pronto -->
   <section class="body-shop" id="funilaria" aria-labelledby="bs-title">
-    <div class="bs-grid wrap">
-      <div class="bs-text">
-        <h2 class="h2" id="bs-title" data-split>Funilaria e pintura</h2>
-        <p class="lead" data-reveal>Amassado, batida, risco fundo ou pintura desgastada, em qualquer tipo de carro. A gente desmonta o que for preciso, corrige a lataria e pinta com tintas PPG para a cor bater com o resto do carro.</p>
+    <div class="bs-scroll">
+      <div class="bs-sticky wrap">
+        <div class="bs-text">
+          <h2 class="h2" id="bs-title" data-split>Funilaria e pintura</h2>
+          <p class="lead" data-reveal>Amassado, batida, risco fundo ou pintura desgastada, em qualquer tipo de carro. A gente desmonta o que for preciso, corrige a lataria e pinta com tintas PPG para a cor bater com o resto do carro.</p>
+          <div class="bs-meter" aria-hidden="true">
+            <span class="bs-meter-label is-on" data-bs-before-label>Na chegada</span>
+            <span class="bs-meter-track"><span class="bs-meter-fill"></span></span>
+            <span class="bs-meter-label" data-bs-after-label>Depois do reparo</span>
+          </div>
+        </div>
+        <figure class="bs-stage">
+          <div class="bs-frame">
+            <img class="bs-photo bs-after" src="assets/img/raptor-after-1000.webp" srcset="assets/img/raptor-after-600.webp 600w, assets/img/raptor-after-1000.webp 1000w, assets/img/raptor-after-1500.webp 1500w" sizes="(min-width: 1024px) 36vw, 88vw" width="1500" height="1840" loading="lazy" decoding="async" alt="A mesma Ford Ranger Raptor com a frente reparada e pintada, na cabine da Vallech">
+            <img class="bs-photo bs-before" src="assets/img/raptor-before-1000.webp" srcset="assets/img/raptor-before-600.webp 600w, assets/img/raptor-before-1000.webp 1000w, assets/img/raptor-before-1500.webp 1500w" sizes="(min-width: 1024px) 36vw, 88vw" width="1500" height="1840" loading="lazy" decoding="async" alt="Ford Ranger Raptor cinza com a frente desmontada após uma batida">
+            <span class="bs-wipe" aria-hidden="true"></span>
+          </div>
+          <figcaption class="bs-caption">
+            <span class="bs-cap bs-cap-before">Ford Ranger Raptor, na chegada.</span>
+            <span class="bs-cap bs-cap-after">A mesma Raptor, depois do reparo.</span>
+          </figcaption>
+        </figure>
       </div>
-      <figure class="bs-before" data-clip>
-        <img src="assets/img/raptor-before-1000.webp" srcset="assets/img/raptor-before-600.webp 600w, assets/img/raptor-before-1000.webp 1000w, assets/img/raptor-before-1500.webp 1500w" sizes="(min-width: 1024px) 28vw, 44vw" width="1500" height="1840" loading="lazy" decoding="async" alt="Ford Ranger Raptor cinza com a frente desmontada após uma batida">
-        <figcaption>Ford Ranger Raptor, na chegada.</figcaption>
-      </figure>
-      <figure class="bs-after" data-clip>
-        <img src="assets/img/raptor-after-1000.webp" srcset="assets/img/raptor-after-600.webp 600w, assets/img/raptor-after-1000.webp 1000w, assets/img/raptor-after-1500.webp 1500w" sizes="(min-width: 1024px) 40vw, 100vw" width="1500" height="1840" loading="lazy" decoding="async" alt="A mesma Ford Ranger Raptor com a frente reparada e pintada, na cabine da Vallech">
-        <figcaption>A mesma Raptor, depois do reparo.</figcaption>
-      </figure>
     </div>
   </section>
 
@@ -188,21 +204,25 @@
     <p class="trucks-mark" aria-hidden="true"><span data-drift><span>Aro</span> <span>16 a 22</span></span></p>
     <div class="tr-grid wrap">
       <figure class="tr-main" data-clip>
-        <img src="assets/img/raptor-front-1200.webp" srcset="assets/img/raptor-front-700.webp 700w, assets/img/raptor-front-1200.webp 1200w, assets/img/raptor-front-1800.webp 1800w" sizes="(min-width: 1024px) 38vw, 100vw" width="1800" height="2400" loading="lazy" decoding="async" alt="Ford Ranger Raptor cinza de frente, com rodas pretas e pneus de uso misto">
+        <img src="assets/img/raptor-front-1200.webp" srcset="assets/img/raptor-front-700.webp 700w, assets/img/raptor-front-1200.webp 1200w, assets/img/raptor-front-1800.webp 1800w" sizes="(min-width: 1024px) 42vw, 100vw" width="1800" height="2400" loading="lazy" decoding="async" alt="Ford Ranger Raptor cinza de frente, com rodas pretas e pneus de uso misto">
       </figure>
+      <div class="tr-copy">
       <div class="tr-text">
         <h2 class="h2" id="tr-title" data-split>Rodas e pneus para picapes</h2>
         <p class="lead" data-reveal>Roda e pneu mudam muito a postura de uma picape. A gente ajuda a escolher o conjunto, do aro 16 ao 22, pensando no seu modelo e em como você usa a picape no dia a dia.</p>
         <a class="link-arrow" href="https://wa.me/5542998316006?text=Ol%C3%A1!%20Quero%20falar%20sobre%20rodas%20e%20pneus%20para%20minha%20picape." target="_blank" rel="noopener" data-reveal><span>Falar no WhatsApp sobre rodas</span><svg class="ic" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
       </div>
-      <figure class="tr-side" data-clip>
-        <img src="assets/img/raptor-side-1000.webp" srcset="assets/img/raptor-side-600.webp 600w, assets/img/raptor-side-1000.webp 1000w" sizes="(min-width: 1024px) 22vw, 50vw" width="1500" height="2000" loading="lazy" decoding="async" alt="Lateral traseira da Ranger Raptor com a roda preta e o pneu de uso misto em destaque">
-        <figcaption>Ford Ranger Raptor</figcaption>
-      </figure>
-      <figure class="tr-alt" data-clip>
-        <img src="assets/img/ranger-1000.webp" srcset="assets/img/ranger-600.webp 600w, assets/img/ranger-1000.webp 1000w" sizes="(min-width: 1024px) 22vw, 50vw" width="1500" height="2000" loading="lazy" decoding="async" alt="Ford Ranger branca com grade e rodas pretas, vista de frente">
-        <figcaption>Ford Ranger</figcaption>
-      </figure>
+      <div class="tr-pair">
+        <figure class="tr-side" data-clip>
+          <img src="assets/img/raptor-side-1000.webp" srcset="assets/img/raptor-side-600.webp 600w, assets/img/raptor-side-1000.webp 1000w" sizes="(min-width: 1024px) 18vw, 70vw" width="1500" height="2000" loading="lazy" decoding="async" alt="Lateral traseira da Ranger Raptor com a roda preta e o pneu de uso misto em destaque">
+          <figcaption>Ford Ranger Raptor</figcaption>
+        </figure>
+        <figure class="tr-alt" data-clip>
+          <img src="assets/img/ranger-1000.webp" srcset="assets/img/ranger-600.webp 600w, assets/img/ranger-1000.webp 1000w" sizes="(min-width: 1024px) 18vw, 70vw" width="1500" height="2000" loading="lazy" decoding="async" alt="Ford Ranger branca com grade e rodas pretas, vista de frente">
+          <figcaption>Ford Ranger</figcaption>
+        </figure>
+      </div>
+      </div>
     </div>
   </section>
 
@@ -257,20 +277,20 @@
       </div>
     </div>
     <ul class="rail" data-rail tabindex="0" aria-label="Trabalhos de personalização">
-      <li class="rail-item rail-tall">
-        <img src="assets/img/taillight-1000.webp" srcset="assets/img/taillight-600.webp 600w, assets/img/taillight-1000.webp 1000w" sizes="(min-width: 1024px) 30vw, 72vw" width="1500" height="2250" loading="lazy" decoding="async" alt="Lanterna traseira vermelha de um Mustang Dark Horse preto fosco, bem de perto">
+      <li class="rail-item">
+        <img src="assets/img/taillight-1000.webp" srcset="assets/img/taillight-600.webp 600w, assets/img/taillight-1000.webp 1000w" sizes="(min-width: 1024px) 24vw, 72vw" width="1500" height="2250" loading="lazy" decoding="async" alt="Lanterna traseira vermelha de um Mustang Dark Horse preto fosco, bem de perto">
         <p>Lanterna do Mustang Dark Horse.</p>
       </li>
       <li class="rail-item">
-        <img src="assets/img/headlight-off-1000.webp" srcset="assets/img/headlight-off-600.webp 600w, assets/img/headlight-off-1000.webp 1000w" sizes="(min-width: 1024px) 26vw, 64vw" width="1500" height="1900" loading="lazy" decoding="async" alt="Farol de um Mustang Mach-E desmontado sobre a bancada, ao lado do carro">
+        <img src="assets/img/headlight-off-1000.webp" srcset="assets/img/headlight-off-600.webp 600w, assets/img/headlight-off-1000.webp 1000w" sizes="(min-width: 1024px) 24vw, 72vw" width="1500" height="1900" loading="lazy" decoding="async" alt="Farol de um Mustang Mach-E desmontado sobre a bancada, ao lado do carro">
         <p>Farol desmontado para o serviço.</p>
       </li>
-      <li class="rail-item rail-tall">
-        <img src="assets/img/ppf-mirror-1000.webp" srcset="assets/img/ppf-mirror-600.webp 600w, assets/img/ppf-mirror-1000.webp 1000w" sizes="(min-width: 1024px) 30vw, 72vw" width="1500" height="2000" loading="lazy" decoding="async" alt="Película sendo aplicada sobre o retrovisor de um Mustang preto fosco">
+      <li class="rail-item">
+        <img src="assets/img/ppf-mirror-1000.webp" srcset="assets/img/ppf-mirror-600.webp 600w, assets/img/ppf-mirror-1000.webp 1000w" sizes="(min-width: 1024px) 24vw, 72vw" width="1500" height="2000" loading="lazy" decoding="async" alt="Película sendo aplicada sobre o retrovisor de um Mustang preto fosco">
         <p>Aplicação de película no retrovisor.</p>
       </li>
       <li class="rail-item">
-        <img src="assets/img/headlight-1000.webp" srcset="assets/img/headlight-600.webp 600w, assets/img/headlight-1000.webp 1000w" sizes="(min-width: 1024px) 26vw, 64vw" width="1500" height="1600" loading="lazy" decoding="async" alt="Mustang Mach-E cinza fosco com o farol aceso dentro da cabine">
+        <img src="assets/img/headlight-1000.webp" srcset="assets/img/headlight-600.webp 600w, assets/img/headlight-1000.webp 1000w" sizes="(min-width: 1024px) 24vw, 72vw" width="1500" height="1600" loading="lazy" decoding="async" alt="Mustang Mach-E cinza fosco com o farol aceso dentro da cabine">
         <p>Mustang Mach-E, de cinza brilhante para fosco.</p>
       </li>
     </ul>

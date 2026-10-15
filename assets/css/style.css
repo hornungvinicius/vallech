@@ -190,7 +190,7 @@ figcaption, .rail p {
   display: grid;
   min-height: 100svh;
   overflow: hidden;
-  background: #000;
+  background: var(--bg);
 }
 .hero-media {
   position: absolute;
@@ -206,7 +206,6 @@ figcaption, .rail p {
   object-fit: cover;
   object-position: 60% 58%;
   transform-origin: 60% 50%;
-  will-change: transform, filter, opacity;
 }
 .hero-shade {
   position: absolute;
@@ -350,22 +349,125 @@ figcaption, .rail p {
 .idx-preview img.is-on { opacity: 1; filter: blur(0); transform: none; z-index: 1; }
 
 /* ---------- 04 Funilaria ---------- */
-.body-shop { padding-block: var(--section); background: var(--bg-2); }
-.bs-grid {
+.body-shop { position: relative; z-index: 0; background: var(--bg-2); --p: 0; }
+.bs-sticky {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: clamp(16px, 2vw, 32px);
-  row-gap: clamp(40px, 6vw, 96px);
+  row-gap: clamp(28px, 4vw, 48px);
+  align-items: end;
+  padding-block: var(--section);
 }
-.bs-text { grid-column: 1 / span 5; grid-row: 1; }
+.bs-text { grid-column: 1 / span 5; align-self: start; }
 .bs-text .lead { margin-top: 28px; }
-.bs-before { grid-column: 1 / span 4; grid-row: 2; align-self: end; }
-.bs-after { grid-column: 6 / span 7; grid-row: 1 / span 2; }
-.bs-before img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
-.bs-after img { width: 100%; aspect-ratio: 4 / 4.4; object-fit: cover; object-position: 50% 62%; }
+.bs-stage { grid-column: 6 / span 7; min-width: 0; }
+.bs-frame {
+  display: grid;
+  grid-template-columns: 0.78fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+.bs-photo { width: 100%; aspect-ratio: 1500 / 1840; object-fit: cover; object-position: 50% 58%; }
+.bs-caption {
+  display: grid;
+  grid-template-columns: 0.78fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.bs-wipe, .bs-meter { display: none; }
+
+/* Com movimento: a seção fica presa e o scroll revela o depois por cima do antes */
+.has-motion .bs-scroll { height: 260vh; }
+.has-motion .bs-sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  align-items: center;
+  align-content: center;
+  padding-top: 92px;
+  padding-bottom: 28px;
+}
+.has-motion .bs-text { align-self: center; }
+.has-motion .bs-stage {
+  width: min(100%, calc((100svh - 210px) * 1500 / 1840));
+  justify-self: end;
+}
+.has-motion .bs-frame {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1500 / 1840;
+  overflow: hidden;
+  background: #141414;
+}
+.has-motion .bs-photo {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  aspect-ratio: auto;
+}
+.has-motion .bs-after { z-index: 0; }
+.has-motion .bs-before {
+  z-index: 1;
+  clip-path: inset(0 0 0 calc(var(--p) * 100%));
+}
+.has-motion .bs-wipe {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--p) * 100%);
+  z-index: 2;
+  width: 2px;
+  background: var(--red);
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: clamp(0, min(var(--p), calc(1 - var(--p))) * 16, 1);
+}
+.has-motion .bs-caption {
+  display: block;
+  position: relative;
+  min-height: 2.8em;
+  margin-top: 14px;
+}
+.has-motion .bs-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+.has-motion .bs-cap-before { opacity: 1; }
+.has-motion .bs-cap-after { opacity: 0; }
+.has-motion .bs-meter {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 32px;
+  max-width: 420px;
+}
+.bs-meter-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.bs-meter-label.is-on { color: var(--fg); }
+.bs-meter-track { position: relative; height: 1px; background: var(--line); }
+.bs-meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  height: 100%;
+  background: var(--red);
+  transform: scaleX(var(--p));
+  transform-origin: 0 50%;
+}
 
 /* ---------- 05 Picapes ---------- */
-.trucks { position: relative; padding-block: clamp(72px, 9vw, 140px) var(--section); overflow: hidden; }
+.trucks { position: relative; z-index: 1; padding-block: clamp(72px, 9vw, 140px) var(--section); overflow: hidden; background: var(--bg); }
 .trucks-mark {
   font-family: var(--f-display);
   font-weight: 700;
@@ -381,19 +483,31 @@ figcaption, .rail p {
 .tr-grid {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: clamp(16px, 2vw, 32px);
-  row-gap: 56px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  column-gap: clamp(20px, 3vw, 48px);
+  align-items: end;
   margin-top: clamp(-34px, -1.6vw, -12px);
 }
-.tr-main { grid-column: 1 / span 5; grid-row: 1 / span 2; }
+.tr-main { min-width: 0; }
 .tr-main img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
-.tr-text { grid-column: 7 / span 5; grid-row: 1; padding-top: clamp(96px, 9vw, 160px); }
+.tr-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: clamp(28px, 4vw, 72px);
+}
 .tr-text .lead { margin-top: 28px; }
 .tr-text .link-arrow { margin-top: 28px; }
-.tr-side { grid-column: 7 / span 3; grid-row: 2; align-self: end; }
-.tr-alt { grid-column: 10 / span 3; grid-row: 2; align-self: end; margin-bottom: clamp(48px, 7vw, 120px); }
-.tr-side img, .tr-alt img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+.tr-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 2vw, 28px);
+  align-items: start;
+  margin-top: clamp(28px, 4vw, 48px);
+  min-width: 0;
+}
+.tr-side, .tr-alt { margin: 0; min-width: 0; }
+.tr-side img, .tr-alt img { width: 100%; aspect-ratio: 3 / 4; height: auto; object-fit: cover; }
 
 /* ---------- 06 Proteção ---------- */
 .prot { padding-block: var(--section); background: var(--bg-2); }
@@ -462,21 +576,20 @@ figcaption, .rail p {
 .round[disabled] { opacity: 0.3; cursor: default; }
 .rail {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: clamp(14px, 2vw, 28px);
   margin-top: clamp(40px, 5vw, 72px);
   padding-inline: max(var(--gx), calc((100vw - 1680px) / 2 + var(--gx)));
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: max(var(--gx), calc((100vw - 1680px) / 2 + var(--gx)));
+  scroll-behavior: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
 }
 .rail::-webkit-scrollbar { display: none; }
-.rail-item { flex: none; width: clamp(240px, 26vw, 460px); scroll-snap-align: start; }
-.rail-item img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
-.rail-tall { width: clamp(260px, 30vw, 520px); }
-.rail-tall img { aspect-ratio: 2 / 3; }
+.rail-item { flex: none; width: clamp(220px, 24vw, 380px); scroll-snap-align: start; }
+.rail-item img { width: 100%; aspect-ratio: 4 / 5; height: auto; object-fit: cover; object-position: center; }
 
 /* ---------- 08 Contato ---------- */
 /* Faixa 2.4:1 com as duas lanternas inteiras, fechando a página como o hero abriu; o convite fica abaixo, sobre o preto */
@@ -623,13 +736,13 @@ figcaption, .rail p {
   .idx-note { grid-column: 2; grid-row: 2; margin-top: -10px; }
   .idx-arrow { grid-column: 3; grid-row: 1 / span 2; opacity: 1; transform: none; width: 22px; height: 22px; }
 
-  .bs-text { grid-column: 1 / -1; }
-  .bs-after { grid-column: 5 / -1; grid-row: 2; }
-  .bs-before { grid-column: 1 / span 4; grid-row: 2; align-self: end; }
+  .bs-text, .bs-stage { grid-column: 1 / -1; }
+  .has-motion .bs-stage { width: min(86vw, calc(40svh * 1500 / 1840)); justify-self: center; }
 
-  .tr-main { grid-column: 1 / span 7; grid-row: 1; }
-  .tr-text { grid-column: 1 / -1; grid-row: 2; padding-top: 0; }
-  .tr-side { grid-column: 8 / -1; grid-row: 1; align-self: end; }
+  .tr-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.85fr); align-items: end; }
+  .tr-copy { display: contents; }
+  .tr-text { grid-column: 1 / -1; grid-row: 2; }
+  .tr-pair { grid-column: 2; grid-row: 1; margin-top: 0; grid-template-columns: 1fr; }
   .tr-alt { display: none; }
 
   .pr-stage { display: none; }
@@ -666,7 +779,7 @@ figcaption, .rail p {
   .hero-foot { flex-direction: column; align-items: flex-start; border-top: 0; padding-top: 0; }
   .hero-actions .btn-red { display: none; } /* o dock já carrega o WhatsApp */
 
-  .std-grid, .idx-grid, .bs-grid, .tr-grid, .pr-grid { column-gap: 12px; }
+  .std-grid, .idx-grid, .bs-sticky, .tr-grid, .pr-grid { column-gap: 12px; }
   .std-portrait { grid-column: 4 / -1; }
   .std-detail { grid-column: 1 / span 6; margin-bottom: -32px; }
   .std-detail figcaption { display: none; }
@@ -676,23 +789,28 @@ figcaption, .rail p {
   .idx-thumb { width: 64px; height: 64px; }
   .idx-note { font-size: 0.875rem; }
 
-  .bs-before { grid-column: 1 / span 6; grid-row: 2; align-self: start; }
-  .bs-after { grid-column: 7 / -1; grid-row: 2; }
-  .bs-after img, .bs-before img { aspect-ratio: 3 / 4; }
+  .has-motion .bs-scroll { height: 220vh; }
+  .has-motion .bs-sticky {
+    padding-top: 28px;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    row-gap: 18px;
+  }
+  .has-motion .bs-stage { width: min(78vw, calc(34svh * 1500 / 1840)); }
+  .has-motion .bs-text .lead { margin-top: 14px; }
+  .has-motion .bs-meter { margin-top: 18px; gap: 10px; }
+  .bs-meter-label { letter-spacing: 0.08em; }
 
   .trucks-mark { font-size: clamp(2.8rem, 15.5vw, 6rem); line-height: 0.95; }
   .trucks-mark [data-drift] > span { display: block; }
-  .tr-grid { margin-top: 24px; row-gap: 40px; }
-  .tr-main { grid-column: 1 / -1; }
-  .tr-side { grid-column: 4 / -1; grid-row: 3; }
-  .tr-text { grid-row: 2; }
+  .tr-grid { grid-template-columns: 1fr; margin-top: 24px; row-gap: 28px; }
+  .tr-main { grid-column: 1; grid-row: 1; }
+  .tr-text { grid-column: 1; grid-row: 2; }
+  .tr-pair { grid-column: 1; grid-row: 3; width: min(100%, 420px); margin-left: auto; margin-top: 0; }
 
   .pr-list { grid-template-columns: 1fr; gap: 64px; }
 
   .cu-head { flex-direction: column; align-items: flex-start; }
-  .cu-ctrl { display: none; }
-  .rail-item { width: 64vw; }
-  .rail-tall { width: 72vw; }
+  .rail-item { width: 72vw; }
 
   .ct-media { aspect-ratio: 4 / 3; }
   .ct-media img { object-position: 22% 50%; }
@@ -722,7 +840,7 @@ figcaption, .rail p {
 }
 
 /* Aceleração de hardware e renderização suave de desfoque */
-.std-portrait img, .std-detail img, .bs-before img, .bs-after img, .tr-main img, .tr-side img, .tr-alt img, .rail-item img, .ct-media img {
+.std-portrait img, .std-detail img, .tr-main img, .tr-side img, .tr-alt img, .ct-media img {
   will-change: transform, filter, opacity;
   transform: translateZ(0);
 }
