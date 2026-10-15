@@ -330,31 +330,33 @@
     );
   }
 
-  // Funilaria: o scroll apaga o antes e revela o depois, no mesmo enquadramento
+  // Funilaria: a seção trava ao chegar. Um trecho de scroll fica parado no antes, e só então a troca começa.
   const bodyShop = $('.body-shop');
   const bsBeforeLabel = $('[data-bs-before-label]');
   const bsAfterLabel = $('[data-bs-after-label]');
   if (bodyShop && document.documentElement.classList.contains('has-motion')) {
-    const morph = gsap.utils.pipe(
-      (value) => gsap.utils.mapRange(0.12, 0.88, 0, 1, value),
-      (value) => gsap.utils.clamp(0, 1, value)
-    );
+    const applyBs = (progress) => {
+      const p = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.22, 0.84, 0, 1, progress));
+      bodyShop.style.setProperty('--p', p.toFixed(4));
+      const showAfter = p >= 0.5;
+      const capBefore = bodyShop.querySelector('.bs-cap-before');
+      const capAfter = bodyShop.querySelector('.bs-cap-after');
+      if (capBefore) capBefore.style.opacity = showAfter ? '0' : '1';
+      if (capAfter) capAfter.style.opacity = showAfter ? '1' : '0';
+      if (bsBeforeLabel) bsBeforeLabel.classList.toggle('is-on', !showAfter);
+      if (bsAfterLabel) bsAfterLabel.classList.toggle('is-on', showAfter);
+    };
+
     ScrollTrigger.create({
-      trigger: '.bs-scroll',
+      trigger: '.body-shop',
       start: 'top top',
-      end: 'bottom bottom',
-      scrub: 0.45,
-      onUpdate: (self) => {
-        const p = morph(self.progress);
-        bodyShop.style.setProperty('--p', p.toFixed(4));
-        const showAfter = p >= 0.5;
-        const capBefore = bodyShop.querySelector('.bs-cap-before');
-        const capAfter = bodyShop.querySelector('.bs-cap-after');
-        if (capBefore) capBefore.style.opacity = showAfter ? '0' : '1';
-        if (capAfter) capAfter.style.opacity = showAfter ? '1' : '0';
-        if (bsBeforeLabel) bsBeforeLabel.classList.toggle('is-on', !showAfter);
-        if (bsAfterLabel) bsAfterLabel.classList.toggle('is-on', showAfter);
-      },
+      end: '+=155%',
+      pin: true,
+      pinSpacing: true,
+      anticipatePin: 1,
+      scrub: true,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => applyBs(self.progress),
     });
   }
 

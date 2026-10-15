@@ -376,11 +376,9 @@ figcaption, .rail p {
 }
 .bs-wipe, .bs-meter { display: none; }
 
-/* Com movimento: a seção fica presa e o scroll revela o depois por cima do antes */
-.has-motion .bs-scroll { height: 260vh; }
+/* Com movimento: o GSAP trava a seção na tela. A troca só começa depois disso. */
 .has-motion .bs-sticky {
-  position: sticky;
-  top: 0;
+  position: relative;
   height: 100svh;
   align-items: center;
   align-content: center;
@@ -789,7 +787,6 @@ figcaption, .rail p {
   .idx-thumb { width: 64px; height: 64px; }
   .idx-note { font-size: 0.875rem; }
 
-  .has-motion .bs-scroll { height: 220vh; }
   .has-motion .bs-sticky {
     padding-top: 28px;
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
