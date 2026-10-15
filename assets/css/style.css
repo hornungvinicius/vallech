@@ -278,10 +278,9 @@ figcaption, .rail p {
   color: var(--red);
 }
 .std-facts dd { margin-top: 10px; color: var(--muted); font-size: 0.9375rem; }
-.std-portrait { grid-column: 6 / span 3; grid-row: 2; align-self: end; margin-bottom: clamp(-110px, -6vw, -36px); position: relative; z-index: 1; }
-.std-portrait img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; object-position: 8% 100%; }
-.std-detail { grid-column: 8 / span 5; grid-row: 1 / span 2; align-self: start; margin-bottom: 0; }
-.std-detail img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 55% 58%; }
+.std-portrait { display: none; }
+.std-detail { grid-column: 7 / span 6; grid-row: 1 / span 2; align-self: center; margin: 0; }
+.std-detail img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 55% 48%; }
 
 /* ---------- 03 Índice de serviços ---------- */
 .idx { padding-block: var(--section) calc(var(--section) * 0.8); }
@@ -722,8 +721,7 @@ figcaption, .rail p {
   .top-menu { display: inline-flex; }
 
   .std-text { grid-column: 1 / -1; grid-row: 1; padding-top: 0; }
-  .std-detail { grid-column: 4 / -1; grid-row: 2; align-self: start; margin-bottom: 0; z-index: 0; }
-  .std-portrait { grid-column: 1 / span 5; grid-row: 2; align-self: end; margin-bottom: -48px; z-index: 1; }
+  .std-detail { grid-column: 4 / -1; grid-row: 2; align-self: start; }
 
   .idx-list { grid-column: 1 / -1; }
   .idx-title { grid-column: 1 / -1; }
@@ -779,9 +777,7 @@ figcaption, .rail p {
   .hero-actions .btn-red { display: none; } /* o dock já carrega o WhatsApp */
 
   .std-grid, .idx-grid, .bs-sticky, .tr-grid, .pr-grid { column-gap: 12px; }
-  .std-detail { grid-column: 5 / -1; margin-bottom: 0; }
-  .std-portrait { grid-column: 1 / span 6; margin-bottom: -32px; }
-  .std-portrait img { object-position: 14% 100%; }
+  .std-detail { grid-column: 1 / -1; }
   .std-detail figcaption { display: none; }
   .std-facts { gap: 40px; }
 
