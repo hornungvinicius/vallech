@@ -498,14 +498,13 @@ figcaption, .rail p {
 .tr-text .link-arrow { margin-top: 28px; }
 .tr-pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(16px, 2vw, 28px);
-  align-items: start;
+  grid-template-columns: minmax(0, 0.62fr);
+  justify-content: start;
   margin-top: clamp(28px, 4vw, 48px);
   min-width: 0;
 }
-.tr-side, .tr-alt { margin: 0; min-width: 0; }
-.tr-side img, .tr-alt img { width: 100%; aspect-ratio: 3 / 4; height: auto; object-fit: cover; }
+.tr-side { margin: 0; min-width: 0; }
+.tr-side img { width: 100%; aspect-ratio: 3 / 4; height: auto; object-fit: cover; object-position: 62% 48%; }
 
 /* ---------- 06 Proteção ---------- */
 .prot { padding-block: var(--section); background: var(--bg-2); }
@@ -736,11 +735,10 @@ figcaption, .rail p {
   .bs-text, .bs-stage { grid-column: 1 / -1; }
   .has-motion .bs-stage { width: min(86vw, calc(40svh * 1500 / 1840)); justify-self: center; }
 
-  .tr-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.85fr); align-items: end; }
+  .tr-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.85fr); align-items: end; margin-top: 18px; }
   .tr-copy { display: contents; }
   .tr-text { grid-column: 1 / -1; grid-row: 2; }
   .tr-pair { grid-column: 2; grid-row: 1; margin-top: 0; grid-template-columns: 1fr; }
-  .tr-alt { display: none; }
 
   .pr-stage { display: none; }
   .pr-list { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px 24px; }
@@ -795,12 +793,17 @@ figcaption, .rail p {
   .has-motion .bs-meter { margin-top: 18px; gap: 10px; }
   .bs-meter-label { letter-spacing: 0.08em; }
 
+  .trucks { padding-top: 56px; }
   .trucks-mark { font-size: clamp(2.3rem, 12.2vw, 4.4rem); line-height: 0.95; }
   .trucks-mark [data-drift] > span { display: block; }
-  .tr-grid { grid-template-columns: 1fr; margin-top: 24px; row-gap: 28px; }
+  .tr-grid { grid-template-columns: 1fr; margin-top: 20px; row-gap: 22px; }
   .tr-main { grid-column: 1; grid-row: 1; }
+  .tr-main img { aspect-ratio: 5 / 4; object-position: 50% 64%; }
   .tr-text { grid-column: 1; grid-row: 2; }
-  .tr-pair { grid-column: 1; grid-row: 3; width: min(100%, 420px); margin-left: auto; margin-top: 0; }
+  .tr-text .lead { margin-top: 14px; }
+  .tr-text .link-arrow { margin-top: 14px; }
+  .tr-pair { grid-column: 1; grid-row: 3; width: 100%; margin-inline: 0; margin-top: 8px; grid-template-columns: 1fr; }
+  .tr-side img { aspect-ratio: 4 / 5; object-position: 48% 58%; }
 
   .pr-list { grid-template-columns: 1fr; gap: 64px; }
 
@@ -820,6 +823,12 @@ figcaption, .rail p {
   .tile-e { grid-column: 1 / -1; grid-row: auto; justify-content: flex-start; gap: 14px; background: none; padding: 16px 0 0; }
 }
 
+@media (max-width: 389px) {
+  .trucks { padding-top: 28px; }
+  .tr-grid { margin-top: 12px; row-gap: 16px; }
+  .tr-main img { aspect-ratio: 6 / 5; }
+}
+
 @media (max-width: 359px) {
   .idx-list a { grid-template-columns: 1fr 22px; }
   .idx-thumb { display: none; }
@@ -835,7 +844,7 @@ figcaption, .rail p {
 }
 
 /* Aceleração de hardware e renderização suave de desfoque */
-.std-portrait img, .std-detail img, .tr-main img, .tr-side img, .tr-alt img, .ct-media img {
+.std-portrait img, .std-detail img, .tr-main img, .tr-side img, .ct-media img {
   will-change: transform, filter, opacity;
   transform: translateZ(0);
 }

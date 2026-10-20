@@ -377,7 +377,6 @@
   };
   fadePhoto($('.tr-main img'), '.tr-main');
   fadePhoto($('.tr-side img'), '.tr-side');
-  fadePhoto($('.tr-alt img'), '.tr-alt');
 
   // Variação 7: Trilho de Personalização (onda sequencial em cascata com desfoque)
   const railItems = $$('[data-rail-item]');
@@ -449,7 +448,7 @@
     });
   });
 
-  // "Aro 16 a 22" corre na horizontal com a rolagem
+  // "Aro 13 a 22" corre na horizontal com a rolagem
   gsap.fromTo('[data-drift]', { xPercent: 6 }, {
     xPercent: -12, ease: 'none',
     scrollTrigger: { trigger: '.trucks', start: 'top bottom', end: 'bottom top', scrub: true },
