@@ -24,7 +24,6 @@
   const rail = $('[data-rail]');
   const prev = $('[data-rail-prev]');
   const next = $('[data-rail-next]');
-  const railCtrl = $('.cu-ctrl');
   [...rail.children].forEach((item) => {
     item.dataset.railItem = '1';
     const clone = item.cloneNode(true);
@@ -67,7 +66,7 @@
       else {
         anim = 0;
         wrap();
-        rail.style.scrollSnapType = '';
+        rail.style.scrollSnapType = rail.classList.contains('is-running') ? 'none' : '';
         if (done) done();
       }
     };
@@ -84,63 +83,70 @@
     animateBy(dir * step);
   };
 
-  prev.addEventListener('click', () => { go(-1); restart(); });
-  next.addEventListener('click', () => { go(1); restart(); });
+  prev.addEventListener('click', () => go(-1));
+  next.addEventListener('click', () => go(1));
 
   let wrapTimer = 0;
   rail.addEventListener('scroll', () => {
-    if (anim) return;
+    if (anim || rail.classList.contains('is-running')) return;
     clearTimeout(wrapTimer);
     wrapTimer = setTimeout(wrap, 90);
   }, { passive: true });
   addEventListener('resize', wrap);
 
-  let timer = 0;
   let paused = false;
   let resumeTimer = 0;
-  const stop = () => { clearInterval(timer); timer = 0; };
-  const start = () => {
-    if (reduce || paused || timer) return;
-    timer = setInterval(() => { if (!paused) go(1); }, 3400);
+  let railFrame = 0;
+  let railLast = 0;
+  let railOn = false;
+  const railSpeed = 110;
+  const railTick = (now) => {
+    railFrame = requestAnimationFrame(railTick);
+    const dt = railLast ? Math.min(34, now - railLast) : 16;
+    railLast = now;
+    if (!railOn || paused || anim) return;
+    rail.scrollLeft += (railSpeed * dt) / 1000;
+    const w = loopWidth();
+    if (w > 1 && rail.scrollLeft >= w) rail.scrollLeft -= w;
   };
-  function restart() {
-    stop();
-    if (!paused) start();
-  }
+  const railPlay = () => {
+    if (reduce || paused) return;
+    railOn = true;
+    rail.classList.add('is-running');
+    rail.style.scrollSnapType = 'none';
+    if (!railFrame) railFrame = requestAnimationFrame(railTick);
+  };
+  const railHalt = () => {
+    railOn = false;
+    rail.classList.remove('is-running');
+    rail.style.scrollSnapType = '';
+  };
   const pause = () => {
     paused = true;
-    stop();
     clearTimeout(resumeTimer);
     if (anim) cancelAnimationFrame(anim);
     anim = 0;
-    rail.style.scrollSnapType = '';
   };
   const resumeSoon = () => {
     clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(() => { paused = false; start(); }, 700);
+    resumeTimer = setTimeout(() => { paused = false; railPlay(); }, 500);
   };
 
-  rail.addEventListener('pointerenter', pause);
-  rail.addEventListener('pointerleave', resumeSoon);
   rail.addEventListener('focusin', pause);
   rail.addEventListener('focusout', (e) => { if (!rail.contains(e.relatedTarget)) resumeSoon(); });
   rail.addEventListener('pointerdown', pause);
+  rail.addEventListener('pointerup', resumeSoon);
+  rail.addEventListener('pointercancel', resumeSoon);
   rail.addEventListener('touchend', resumeSoon, { passive: true });
-  if (railCtrl) {
-    railCtrl.addEventListener('pointerenter', pause);
-    railCtrl.addEventListener('pointerleave', resumeSoon);
-    railCtrl.addEventListener('focusin', pause);
-    railCtrl.addEventListener('focusout', (e) => { if (!railCtrl.contains(e.relatedTarget)) resumeSoon(); });
-  }
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stop();
-    else if (!paused) start();
+    railLast = 0;
+    if (document.hidden) railOn = false;
+    else if (!paused && rail.classList.contains('is-running')) railOn = true;
   });
-  const railHovering = () => rail.matches(':hover') || (railCtrl && railCtrl.matches(':hover'));
   new IntersectionObserver(([e]) => {
-    if (!e.isIntersecting) { stop(); return; }
-    if (!railHovering()) { paused = false; start(); }
-  }, { threshold: 0.35 }).observe($('.custom'));
+    if (!e.isIntersecting) { railHalt(); return; }
+    if (!paused) railPlay();
+  }, { threshold: 0.05 }).observe($('.custom'));
 
   /* ---------- Estados ligados à rolagem (sem depender do GSAP) ---------- */
   const hero = $('.hero');
@@ -360,23 +366,21 @@
     });
   }
 
-  // Picapes: entrada simples, sem deslocar as fotos (o parallax desalinhava o par)
-  const fadePhoto = (img, trigger) => {
-    if (!img) return;
-    gsap.fromTo(img,
+  const truckImgs = $$('.tr-photos img');
+  if (truckImgs.length) {
+    gsap.fromTo(truckImgs,
       { opacity: 0, filter: 'blur(12px)' },
       {
         opacity: 1,
         filter: 'blur(0px)',
-        duration: 1.2,
+        duration: 1.1,
+        stagger: 0.08,
         ease: 'power2.out',
-        scrollTrigger: { trigger, start: 'top 88%', once: true },
-        onComplete: () => gsap.set(img, { clearProps: 'filter,opacity,transform' }),
+        scrollTrigger: { trigger: '.tr-photos', start: 'top 88%', once: true },
+        onComplete: () => gsap.set(truckImgs, { clearProps: 'filter,opacity,transform' }),
       }
     );
-  };
-  fadePhoto($('.tr-main img'), '.tr-main');
-  fadePhoto($('.tr-side img'), '.tr-side');
+  }
 
   // Variação 7: Trilho de Personalização (onda sequencial em cascata com desfoque)
   const railItems = $$('[data-rail-item]');
@@ -448,10 +452,19 @@
     });
   });
 
-  // "Aro 13 a 22" corre na horizontal com a rolagem
-  gsap.fromTo('[data-drift]', { xPercent: 6 }, {
-    xPercent: -12, ease: 'none',
-    scrollTrigger: { trigger: '.trucks', start: 'top bottom', end: 'bottom top', scrub: true },
+  // Faixa "Aro 13 a 22": duas camadas cruzam no scroll, uma por cima da outra
+  $$('[data-marquee]').forEach((track) => {
+    const ghost = track.classList.contains('is-ghost');
+    gsap.fromTo(track, { xPercent: ghost ? -22 : -4 }, {
+      xPercent: ghost ? 6 : -28,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.trucks',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+      },
+    });
   });
 
   document.fonts.ready.then(() => ScrollTrigger.refresh());

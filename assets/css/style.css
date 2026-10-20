@@ -465,46 +465,66 @@ figcaption, .rail p {
 }
 
 /* ---------- 05 Picapes ---------- */
-.trucks { position: relative; z-index: 1; padding-block: clamp(72px, 9vw, 140px) var(--section); overflow: hidden; background: var(--bg); }
-.trucks-mark {
+.trucks { position: relative; z-index: 1; padding-block: clamp(56px, 8vw, 120px) var(--section); overflow: hidden; background: var(--bg); }
+.trucks-band {
+  position: relative;
+  overflow: hidden;
+  height: 1.02em;
+  margin-bottom: clamp(40px, 6vw, 88px);
   font-family: var(--f-display);
   font-weight: 700;
-  text-transform: uppercase;
   font-size: clamp(3rem, 10.2vw, 11.5rem);
   line-height: 0.9;
   letter-spacing: -0.01em;
-  white-space: nowrap;
-  padding-inline: var(--gx);
+  text-transform: uppercase;
   color: var(--fg);
 }
-.trucks-mark span { display: inline-block; }
-.tr-grid {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-  column-gap: clamp(20px, 3vw, 48px);
-  align-items: end;
-  margin-top: clamp(-34px, -1.6vw, -12px);
+.trucks-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  will-change: transform;
 }
-.tr-main { min-width: 0; }
-.tr-main img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+.trucks-track span { padding-right: 0.42em; }
+.trucks-track.is-ghost {
+  z-index: 0;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(242 240 235 / 0.42);
+  top: 0.06em;
+}
+.trucks-track:not(.is-ghost) { z-index: 1; }
 .tr-copy {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  padding-top: clamp(28px, 4vw, 72px);
+  align-items: center;
+  text-align: center;
+  max-width: 920px;
 }
-.tr-text .lead { margin-top: 28px; }
-.tr-text .link-arrow { margin-top: 28px; }
-.tr-pair {
+.tr-lead {
+  max-width: none;
+  margin-top: 22px;
+}
+.tr-lead span { display: block; }
+.tr-copy .link-arrow { margin-top: 28px; }
+.tr-photos {
   display: grid;
-  grid-template-columns: minmax(0, 0.62fr);
-  justify-content: start;
-  margin-top: clamp(28px, 4vw, 48px);
-  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 1.4vw, 22px);
+  margin-top: clamp(40px, 5vw, 80px);
 }
-.tr-side { margin: 0; min-width: 0; }
-.tr-side img { width: 100%; aspect-ratio: 3 / 4; height: auto; object-fit: cover; object-position: 62% 48%; }
+.tr-photos figure { margin: 0; min-width: 0; }
+.tr-photos img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  height: auto;
+  object-fit: cover;
+}
+.tr-photos figure:nth-child(1) img { object-position: 50% 58%; }
+.tr-photos figure:nth-child(2) img { object-position: 58% 62%; }
+.tr-photos figure:nth-child(3) img { object-position: 46% 58%; }
 
 /* ---------- 06 Proteção ---------- */
 .prot { padding-block: var(--section); background: var(--bg-2); }
@@ -584,6 +604,7 @@ figcaption, .rail p {
   overscroll-behavior-x: contain;
   scrollbar-width: none;
 }
+.rail.is-running { scroll-snap-type: none; }
 .rail::-webkit-scrollbar { display: none; }
 .rail-item { flex: none; width: clamp(220px, 24vw, 380px); scroll-snap-align: start; }
 .rail-item img { width: 100%; aspect-ratio: 4 / 5; height: auto; object-fit: cover; object-position: center; }
@@ -735,10 +756,7 @@ figcaption, .rail p {
   .bs-text, .bs-stage { grid-column: 1 / -1; }
   .has-motion .bs-stage { width: min(86vw, calc(40svh * 1500 / 1840)); justify-self: center; }
 
-  .tr-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.85fr); align-items: end; margin-top: 18px; }
-  .tr-copy { display: contents; }
-  .tr-text { grid-column: 1 / -1; grid-row: 2; }
-  .tr-pair { grid-column: 2; grid-row: 1; margin-top: 0; grid-template-columns: 1fr; }
+  .tr-lead span { white-space: normal; }
 
   .pr-stage { display: none; }
   .pr-list { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px 24px; }
@@ -774,7 +792,7 @@ figcaption, .rail p {
   .hero-foot { flex-direction: column; align-items: flex-start; border-top: 0; padding-top: 0; }
   .hero-actions .btn-red { display: none; } /* o dock já carrega o WhatsApp */
 
-  .std-grid, .idx-grid, .bs-sticky, .tr-grid, .pr-grid { column-gap: 12px; }
+  .std-grid, .idx-grid, .bs-sticky, .pr-grid { column-gap: 12px; }
   .std-detail { grid-column: 1 / -1; }
   .std-detail figcaption { display: none; }
   .std-facts { gap: 40px; }
@@ -793,17 +811,10 @@ figcaption, .rail p {
   .has-motion .bs-meter { margin-top: 18px; gap: 10px; }
   .bs-meter-label { letter-spacing: 0.08em; }
 
-  .trucks { padding-top: 56px; }
-  .trucks-mark { font-size: clamp(2.3rem, 12.2vw, 4.4rem); line-height: 0.95; }
-  .trucks-mark [data-drift] > span { display: block; }
-  .tr-grid { grid-template-columns: 1fr; margin-top: 20px; row-gap: 22px; }
-  .tr-main { grid-column: 1; grid-row: 1; }
-  .tr-main img { aspect-ratio: 5 / 4; object-position: 50% 64%; }
-  .tr-text { grid-column: 1; grid-row: 2; }
-  .tr-text .lead { margin-top: 14px; }
-  .tr-text .link-arrow { margin-top: 14px; }
-  .tr-pair { grid-column: 1; grid-row: 3; width: 100%; margin-inline: 0; margin-top: 8px; grid-template-columns: 1fr; }
-  .tr-side img { aspect-ratio: 4 / 5; object-position: 48% 58%; }
+  .trucks-band { font-size: clamp(2.7rem, 14vw, 5.5rem); }
+  .tr-lead { margin-top: 16px; }
+  .tr-copy .link-arrow { margin-top: 18px; }
+  .tr-photos { gap: 8px; margin-top: 28px; }
 
   .pr-list { grid-template-columns: 1fr; gap: 64px; }
 
@@ -823,10 +834,8 @@ figcaption, .rail p {
   .tile-e { grid-column: 1 / -1; grid-row: auto; justify-content: flex-start; gap: 14px; background: none; padding: 16px 0 0; }
 }
 
-@media (max-width: 389px) {
-  .trucks { padding-top: 28px; }
-  .tr-grid { margin-top: 12px; row-gap: 16px; }
-  .tr-main img { aspect-ratio: 6 / 5; }
+@media (min-width: 768px) {
+  .tr-lead span { white-space: nowrap; }
 }
 
 @media (max-width: 359px) {
@@ -844,7 +853,7 @@ figcaption, .rail p {
 }
 
 /* Aceleração de hardware e renderização suave de desfoque */
-.std-portrait img, .std-detail img, .tr-main img, .tr-side img, .ct-media img {
+.std-portrait img, .std-detail img, .tr-photos img, .ct-media img {
   will-change: transform, filter, opacity;
   transform: translateZ(0);
 }
