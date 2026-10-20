@@ -10,6 +10,15 @@ python -m http.server 5173
 
 Publicado na Vercel direto deste repositório (preset **Other**, sem build command, output = raiz). Todo push na `main` gera deploy automático.
 
+## Publicar (Hostinger)
+O CDN da Hostinger guarda CSS e JS por 7 dias. Antes de subir, rode:
+
+```bash
+python version-assets.py
+```
+
+Ele coloca `?v=<hash>` nos links de CSS/JS do `index.html`, então qualquer mudança vira um endereço novo e ninguém fica com o arquivo velho.
+
 ## Fontes
 - Kycron (display, arquivo enviado pelo cliente/agência). Confirmar se a licença cobre uso web.
 - Archivo (texto), Google Fonts, licença OFL, servida localmente.

@@ -2,6 +2,11 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mobile = matchMedia('(max-width: 767px)').matches;
+  // Desfoque só no desktop com mouse: no celular ele pesa na GPU e engasga a rolagem.
+  const fx = document.documentElement.classList.contains('fx');
+  const blur = (px) => (fx ? { filter: `blur(${px}px)` } : {});
+  const clearFx = fx ? 'filter,transform,opacity' : 'transform,opacity';
   const top = $('[data-top]');
 
   /* ---------- Menu ---------- */
@@ -90,66 +95,92 @@
   rail.addEventListener('scroll', () => {
     if (anim || rail.classList.contains('is-running')) return;
     clearTimeout(wrapTimer);
-    wrapTimer = setTimeout(wrap, 90);
+    wrapTimer = setTimeout(wrap, 120);
   }, { passive: true });
   addEventListener('resize', wrap);
 
-  let paused = false;
-  let resumeTimer = 0;
-  let railFrame = 0;
-  let railLast = 0;
-  let railOn = false;
-  const railSpeed = 110;
-  const railTick = (now) => {
-    railFrame = requestAnimationFrame(railTick);
-    const dt = railLast ? Math.min(34, now - railLast) : 16;
-    railLast = now;
-    if (!railOn || paused || anim) return;
-    rail.scrollLeft += (railSpeed * dt) / 1000;
-    const w = loopWidth();
-    if (w > 1 && rail.scrollLeft >= w) rail.scrollLeft -= w;
-  };
-  const railPlay = () => {
-    if (reduce || paused) return;
-    railOn = true;
-    rail.classList.add('is-running');
-    rail.style.scrollSnapType = 'none';
-    if (!railFrame) railFrame = requestAnimationFrame(railTick);
-  };
-  const railHalt = () => {
-    railOn = false;
-    rail.classList.remove('is-running');
-    rail.style.scrollSnapType = '';
-  };
-  const pause = () => {
-    paused = true;
-    clearTimeout(resumeTimer);
-    if (anim) cancelAnimationFrame(anim);
-    anim = 0;
-  };
-  const resumeSoon = () => {
-    clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(() => { paused = false; railPlay(); }, 500);
-  };
+  // Rolagem automática só no desktop. No celular o dedo manda: deslizar com snap, sem o trilho fugindo.
+  if (!mobile && !reduce) {
+    let paused = false;
+    let resumeTimer = 0;
+    let railFrame = 0;
+    let railLast = 0;
+    const railSpeed = 90;
+    const railTick = (now) => {
+      railFrame = requestAnimationFrame(railTick);
+      const dt = railLast ? Math.min(34, now - railLast) : 16;
+      railLast = now;
+      if (paused || anim) return;
+      rail.scrollLeft += (railSpeed * dt) / 1000;
+      const w = loopWidth();
+      if (w > 1 && rail.scrollLeft >= w) rail.scrollLeft -= w;
+    };
+    const railPlay = () => {
+      if (paused || railFrame) return;
+      rail.classList.add('is-running');
+      rail.style.scrollSnapType = 'none';
+      railLast = 0;
+      railFrame = requestAnimationFrame(railTick);
+    };
+    const railHalt = () => {
+      cancelAnimationFrame(railFrame);
+      railFrame = 0;
+      rail.classList.remove('is-running');
+      rail.style.scrollSnapType = '';
+    };
+    const pause = () => {
+      paused = true;
+      clearTimeout(resumeTimer);
+      if (anim) cancelAnimationFrame(anim);
+      anim = 0;
+    };
+    const resumeSoon = () => {
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => { paused = false; railPlay(); }, 600);
+    };
+    rail.addEventListener('focusin', pause);
+    rail.addEventListener('focusout', (e) => { if (!rail.contains(e.relatedTarget)) resumeSoon(); });
+    rail.addEventListener('pointerenter', pause);
+    rail.addEventListener('pointerleave', resumeSoon);
+    [prev, next].forEach((b) => b.addEventListener('click', () => { pause(); resumeSoon(); }));
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && !document.hidden) railPlay();
+      else railHalt();
+    }, { threshold: 0.05 }).observe($('.custom'));
+    document.addEventListener('visibilitychange', () => { if (document.hidden) railHalt(); });
+  }
 
-  rail.addEventListener('focusin', pause);
-  rail.addEventListener('focusout', (e) => { if (!rail.contains(e.relatedTarget)) resumeSoon(); });
-  rail.addEventListener('pointerdown', pause);
-  rail.addEventListener('pointerup', resumeSoon);
-  rail.addEventListener('pointercancel', resumeSoon);
-  rail.addEventListener('touchend', resumeSoon, { passive: true });
-  document.addEventListener('visibilitychange', () => {
-    railLast = 0;
-    if (document.hidden) railOn = false;
-    else if (!paused && rail.classList.contains('is-running')) railOn = true;
-  });
+  /* ---------- Hero: três fotos em fade cruzado ---------- */
+  const hero = $('.hero');
+  const slides = $$('[data-slide]');
+  const dots = $$('.hero-dots span');
+  const SLIDE_MS = 5600;
+  let slideIdx = 0;
+  let slideTimer = 0;
+  const showSlide = (i) => {
+    slideIdx = (i + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle('is-on', k === slideIdx));
+    dots.forEach((d, k) => {
+      d.classList.remove('is-on');
+      if (k === slideIdx) { void d.offsetWidth; d.classList.add('is-on'); } // reinicia a barrinha
+    });
+  };
+  const slidePlay = () => {
+    if (reduce || slideTimer) return;
+    slideTimer = setInterval(() => showSlide(slideIdx + 1), SLIDE_MS);
+  };
+  const slideStop = () => { clearInterval(slideTimer); slideTimer = 0; };
+  hero.style.setProperty('--slide-ms', SLIDE_MS + 'ms');
+  if (reduce) dots.forEach((d) => d.classList.remove('is-on'));
+  // Só gira com a hero na tela e a aba visível
+  let heroVisible = true;
   new IntersectionObserver(([e]) => {
-    if (!e.isIntersecting) { railHalt(); return; }
-    if (!paused) railPlay();
-  }, { threshold: 0.05 }).observe($('.custom'));
+    heroVisible = e.isIntersecting;
+    heroVisible && !document.hidden ? slidePlay() : slideStop();
+  }, { threshold: 0.15 }).observe(hero);
+  document.addEventListener('visibilitychange', () => (document.hidden || !heroVisible ? slideStop() : slidePlay()));
 
   /* ---------- Estados ligados à rolagem (sem depender do GSAP) ---------- */
-  const hero = $('.hero');
   new IntersectionObserver(([e]) => top.classList.toggle('is-solid', !e.isIntersecting), { rootMargin: '-72px 0px 0px 0px' }).observe(hero);
 
   // Proteção: o item no centro da tela define a imagem fixa ao lado
@@ -176,275 +207,144 @@
   }, { rootMargin: '-50% 0px -50% 0px' });
   ['servicos', 'funilaria', 'picapes', 'protecao', 'personalizacao', 'contato'].forEach((id) => navObserver.observe(document.getElementById(id)));
 
-  /* ---------- Movimento e Animações ---------- */
+  /* ---------- Movimento ---------- */
   if (!window.gsap || !window.ScrollTrigger || reduce) return;
   gsap.registerPlugin(ScrollTrigger);
+  // Barra de endereço do celular abrindo e fechando não deve recalcular tudo
+  ScrollTrigger.config({ ignoreMobileResize: true });
   window.__vallechMotion = true;
+  const mm = gsap.matchMedia();
 
-  /* 1. ABERTURA: entrada curta. O scroll da hero só começa depois, para não gravar o blur inicial. */
-  const clearHeroInline = () => {
-    gsap.set('.hero-media img, .hero-title .line-in, [data-hero-fade], .top, .hero-body, .hero-media', {
-      clearProps: 'filter,transform,opacity'
-    });
-  };
-
+  /* 1. Abertura: tudo em fade. A foto aparece, o título sobe de leve, o resto chega por último. */
   const setupHeroScroll = () => {
-    clearHeroInline();
-    // Só um parallax leve. Sem opacidade e sem blur: isso deixava a foto preta na volta do scroll.
+    gsap.set('.hero-title .line-in, [data-hero-fade], .top, .hero-media', { clearProps: clearFx });
+    // Parallax: a foto desce mais devagar que a página. A hero corta o excesso, então não abre faixa vazia.
     gsap.fromTo('.hero-media', { yPercent: 0 }, {
-      yPercent: 6,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: true,
-        invalidateOnRefresh: true,
-      },
+      yPercent: mobile ? 12 : 24, ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true, invalidateOnRefresh: true },
     });
-    gsap.fromTo('.hero-media img', { scale: 1 }, {
-      scale: 1.05,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: true,
-      },
-    });
-    // Se algum tween antigo deixou opacidade ou blur, voltar ao topo restaura a foto.
-    ScrollTrigger.create({
-      trigger: '.hero',
-      start: 'top top',
-      end: 'bottom top',
-      onUpdate: (self) => {
-        if (self.progress > 0.015) return;
-        const img = document.querySelector('.hero-media img');
-        if (!img) return;
-        img.style.opacity = '';
-        img.style.filter = '';
-      },
+    // Desktop: o texto sai antes da foto. No celular ele rola junto com a página (deslocar abria um vão escuro).
+    mm.add('(min-width: 768px)', () => {
+      gsap.to('.hero-body', {
+        yPercent: -10, opacity: 0.2, ease: 'none',
+        scrollTrigger: { trigger: '.hero', start: '35% top', end: 'bottom top', scrub: true },
+      });
     });
   };
 
   if (document.documentElement.classList.contains('motion')) {
-    const tl = gsap.timeline({
+    gsap.timeline({
       defaults: { ease: 'power2.out' },
       onComplete: () => {
         document.documentElement.classList.remove('motion');
         setupHeroScroll();
       },
-    });
-
-    tl.fromTo('.hero-media img',
-      { opacity: 0, filter: 'blur(16px)', scale: 1.06 },
-      { opacity: 1, filter: 'blur(0px)', scale: 1, duration: 1.35, ease: 'power2.out' }
-    )
-    .fromTo('.hero-title .line-in',
-      { opacity: 0, filter: 'blur(10px)', y: 18 },
-      { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.05, stagger: 0.1, ease: 'power3.out' },
-      0.35
-    )
-    .fromTo('.top',
-      { opacity: 0 },
-      { opacity: 1, duration: 0.8 },
-      0.55
-    )
-    .fromTo('[data-hero-fade]',
-      { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, duration: 0.9, stagger: 0.08, ease: 'power2.out' },
-      0.6
-    );
+    })
+      .fromTo('.hero-media', { opacity: 0 }, { opacity: 1, duration: 1.6, ease: 'power1.inOut' })
+      .fromTo('.hero-title .line-in', { opacity: 0, y: 18, ...blur(10) }, { opacity: 1, y: 0, ...blur(0), duration: 1.1, stagger: 0.12 }, 0.45)
+      .fromTo('.top', { opacity: 0 }, { opacity: 1, duration: 0.9 }, 0.6)
+      .fromTo('[data-hero-fade]', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 1, stagger: 0.08 }, 0.75);
   } else {
     setupHeroScroll();
   }
 
-  /* 3. TÍTULOS COM ENTRADA EM FADE SUAVE + DESFOQUE GAUSSIANO */
+  /* 2. Títulos entram palavra por palavra */
   $$('[data-split]').forEach((el) => {
     el.setAttribute('aria-label', el.textContent.trim());
     el.innerHTML = el.textContent.trim().split(/\s+/)
       .map((w) => `<span class="w" aria-hidden="true"><span class="w-in">${w}</span></span>`).join(' ');
-
-    gsap.fromTo(el.querySelectorAll('.w-in'), 
-      { opacity: 0, filter: 'blur(14px)', y: 14 },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        y: 0,
-        duration: 1.2,
-        ease: 'power2.out',
-        stagger: 0.035,
-        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-        onComplete: () => {
-          gsap.set(el.querySelectorAll('.w-in'), { clearProps: 'filter,transform,opacity' });
-        }
-      }
-    );
+    const words = el.querySelectorAll('.w-in');
+    gsap.fromTo(words, { opacity: 0, y: 14, ...blur(14) }, {
+      opacity: 1, y: 0, ...blur(0), duration: 1.1, ease: 'power2.out', stagger: 0.035,
+      scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+      onComplete: () => gsap.set(words, { clearProps: clearFx }),
+    });
   });
 
-  /* 4. TEXTOS E CTAs COM FADE IN SMOOTH + GAUSSIAN BLUR */
+  /* 3. Textos e CTAs */
   gsap.utils.toArray('[data-reveal]').forEach((el) => {
-    gsap.fromTo(el, 
-      { opacity: 0, filter: 'blur(10px)', y: 22 },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        y: 0,
-        duration: 1.2,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-        onComplete: () => gsap.set(el, { clearProps: 'filter,transform,opacity' })
-      }
-    );
+    gsap.fromTo(el, { opacity: 0, y: 22, ...blur(10) }, {
+      opacity: 1, y: 0, ...blur(0), duration: 1.1, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 90%', once: true },
+      onComplete: () => gsap.set(el, { clearProps: clearFx }),
+    });
   });
 
-  /* 5. ANIMAÇÕES VARIADAS DE IMAGENS COM FADE IN + DESFOQUE GAUSSIANO */
-
-  // Variação 1: O Padrão Vallech - Foto do artesão (foco macro de estúdio com scale suave)
-  const stdPortrait = $('.std-portrait img');
-  if (stdPortrait) {
-    gsap.fromTo(stdPortrait,
-      { opacity: 0, filter: 'blur(26px)', scale: 1.08 },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        scale: 1,
-        duration: 1.7,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.std-portrait', start: 'top 85%', once: true },
-        onComplete: () => gsap.set(stdPortrait, { clearProps: 'filter' })
-      }
-    );
-  }
-
-  // Variação 2: O Padrão Vallech - Detalhe das mãos (flutuação lateral em drift + foco)
+  /* 4. Imagens */
   const stdDetail = $('.std-detail img');
   if (stdDetail) {
-    gsap.fromTo(stdDetail,
-      { opacity: 0, filter: 'blur(18px)', x: -25, y: 30, scale: 0.96 },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        x: 0,
-        y: 0,
-        scale: 1,
-        duration: 1.5,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.std-detail', start: 'top 88%', once: true },
-        onComplete: () => gsap.set(stdDetail, { clearProps: 'filter' })
-      }
-    );
-  }
-
-  // Funilaria: a seção trava ao chegar. Um trecho de scroll fica parado no antes, e só então a troca começa.
-  const bodyShop = $('.body-shop');
-  const bsBeforeLabel = $('[data-bs-before-label]');
-  const bsAfterLabel = $('[data-bs-after-label]');
-  if (bodyShop && document.documentElement.classList.contains('has-motion')) {
-    const applyBs = (progress) => {
-      const p = gsap.utils.clamp(0, 1, gsap.utils.mapRange(0.22, 0.84, 0, 1, progress));
-      bodyShop.style.setProperty('--p', p.toFixed(4));
-      const showAfter = p >= 0.5;
-      const capBefore = bodyShop.querySelector('.bs-cap-before');
-      const capAfter = bodyShop.querySelector('.bs-cap-after');
-      if (capBefore) capBefore.style.opacity = showAfter ? '0' : '1';
-      if (capAfter) capAfter.style.opacity = showAfter ? '1' : '0';
-      if (bsBeforeLabel) bsBeforeLabel.classList.toggle('is-on', !showAfter);
-      if (bsAfterLabel) bsAfterLabel.classList.toggle('is-on', showAfter);
-    };
-
-    ScrollTrigger.create({
-      trigger: '.body-shop',
-      start: 'top top',
-      end: '+=155%',
-      pin: true,
-      pinSpacing: true,
-      anticipatePin: 1,
-      scrub: true,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => applyBs(self.progress),
+    gsap.fromTo(stdDetail, { opacity: 0, y: 30, scale: 1.04, ...blur(18) }, {
+      opacity: 1, y: 0, scale: 1, ...blur(0), duration: 1.4, ease: 'power3.out',
+      scrollTrigger: { trigger: '.std-detail', start: 'top 88%', once: true },
+      onComplete: () => gsap.set(stdDetail, { clearProps: clearFx }),
     });
   }
 
+  // Funilaria: a foto da chegada é varrida pela foto do reparo pronto, conforme a rolagem
+  const bodyShop = $('.body-shop');
+  const bsBeforeLabel = $('[data-bs-before-label]');
+  const bsAfterLabel = $('[data-bs-after-label]');
+  const applyBs = (progress, from, to) => {
+    const p = gsap.utils.clamp(0, 1, gsap.utils.mapRange(from, to, 0, 1, progress));
+    bodyShop.style.setProperty('--p', p.toFixed(4));
+    const showAfter = p >= 0.5;
+    bsBeforeLabel.classList.toggle('is-on', !showAfter);
+    bsAfterLabel.classList.toggle('is-on', showAfter);
+  };
+  // Desktop: a seção trava na tela e um trecho de scroll fica parado no antes
+  mm.add('(min-width: 1024px)', () => {
+    ScrollTrigger.create({
+      trigger: '.body-shop', start: 'top top', end: '+=155%',
+      pin: true, pinSpacing: true, anticipatePin: 1, scrub: true, invalidateOnRefresh: true,
+      onUpdate: (self) => applyBs(self.progress, 0.22, 0.84),
+    });
+  });
+  // Celular e tablet: sem travar a página. A varredura acompanha a foto passando pela tela.
+  mm.add('(max-width: 1023px)', () => {
+    ScrollTrigger.create({
+      trigger: '.bs-frame', start: 'top 70%', end: 'bottom 45%', scrub: true,
+      onUpdate: (self) => applyBs(self.progress, 0.08, 0.92),
+    });
+  });
+
   const truckImgs = $$('.tr-photos img');
   if (truckImgs.length) {
-    gsap.fromTo(truckImgs,
-      { opacity: 0, filter: 'blur(12px)' },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        duration: 1.1,
-        stagger: 0.08,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.tr-photos', start: 'top 88%', once: true },
-        onComplete: () => gsap.set(truckImgs, { clearProps: 'filter,opacity,transform' }),
-      }
-    );
+    gsap.fromTo(truckImgs, { opacity: 0, y: 24, ...blur(12) }, {
+      opacity: 1, y: 0, ...blur(0), duration: 1.1, stagger: 0.08, ease: 'power2.out',
+      scrollTrigger: { trigger: '.tr-photos', start: 'top 88%', once: true },
+      onComplete: () => gsap.set(truckImgs, { clearProps: clearFx }),
+    });
   }
 
-  // Variação 7: Trilho de Personalização (onda sequencial em cascata com desfoque)
   const railItems = $$('[data-rail-item]');
   if (railItems.length) {
-    gsap.fromTo(railItems,
-      { opacity: 0, filter: 'blur(16px)', y: 30, scale: 0.98 },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        y: 0,
-        scale: 1,
-        duration: 1.3,
-        stagger: 0.12,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.rail', start: 'top 86%', once: true },
-        onComplete: () => gsap.set(railItems, { clearProps: 'filter' })
-      }
-    );
+    gsap.fromTo(railItems, { opacity: 0, y: 30, ...blur(16) }, {
+      opacity: 1, y: 0, ...blur(0), duration: 1.2, stagger: 0.1, ease: 'power2.out',
+      scrollTrigger: { trigger: '.rail', start: 'top 86%', once: true },
+      onComplete: () => gsap.set(railItems, { clearProps: clearFx }),
+    });
   }
 
-  // Variação 8: Contato (Traseira do Mustang se aproxima com foco abrindo)
+  // Contato: a traseira se aproxima enquanto a faixa entra. Sem desfoque nem escurecer: a foto chega nítida.
   const ctImg = $('[data-ct-media] img');
   if (ctImg) {
-    gsap.fromTo(ctImg,
-      { scale: 1.15, filter: 'blur(20px)', opacity: 0.35 },
-      {
-        scale: 1,
-        filter: 'blur(0px)',
-        opacity: 1,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.contact',
-          start: 'top bottom',
-          end: 'center 60%',
-          scrub: 0.8,
-        }
-      }
-    );
+    gsap.fromTo(ctImg, { scale: 1.14 }, {
+      scale: 1, ease: 'none',
+      scrollTrigger: { trigger: '.contact', start: 'top bottom', end: 'top 25%', scrub: true },
+    });
   }
 
-  // Lista do Índice de Serviços (revelação suave em cascata)
   const idxItems = $$('.idx-list li');
   if (idxItems.length) {
-    gsap.fromTo(idxItems,
-      { opacity: 0, filter: 'blur(8px)', x: -15 },
-      {
-        opacity: 1,
-        filter: 'blur(0px)',
-        x: 0,
-        duration: 1.1,
-        stagger: 0.08,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.idx-list', start: 'top 85%', once: true },
-        onComplete: () => gsap.set(idxItems, { clearProps: 'filter,transform,opacity' })
-      }
-    );
+    gsap.fromTo(idxItems, { opacity: 0, x: -15, ...blur(8) }, {
+      opacity: 1, x: 0, ...blur(0), duration: 1.1, stagger: 0.08, ease: 'power2.out',
+      scrollTrigger: { trigger: '.idx-list', start: 'top 85%', once: true },
+      onComplete: () => gsap.set(idxItems, { clearProps: clearFx }),
+    });
   }
 
-  // Parallax de profundidade em elementos de tela média/larga
-  const mm = gsap.matchMedia();
   mm.add('(min-width: 768px)', () => {
-    // Parallax suave entre camadas
     gsap.to('.std-detail', { yPercent: -6, ease: 'none', scrollTrigger: { trigger: '.std', start: 'top bottom', end: 'bottom top', scrub: true } });
-
     // Esconde o topo ao descer, mostra ao subir
     ScrollTrigger.create({
       start: 0, end: 'max',
@@ -452,18 +352,12 @@
     });
   });
 
-  // Faixa "Aro 13 a 22": duas camadas cruzam no scroll, uma por cima da outra
+  // Faixa "Aro 13 a 22": as camadas cruzam com o scroll
   $$('[data-marquee]').forEach((track) => {
     const ghost = track.classList.contains('is-ghost');
     gsap.fromTo(track, { xPercent: ghost ? -22 : -4 }, {
-      xPercent: ghost ? 6 : -28,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.trucks',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
-      },
+      xPercent: ghost ? 6 : -28, ease: 'none',
+      scrollTrigger: { trigger: '.trucks', start: 'top bottom', end: 'bottom top', scrub: true },
     });
   });
 

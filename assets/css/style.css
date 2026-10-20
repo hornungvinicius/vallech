@@ -23,7 +23,7 @@
   --f-text: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --gx: clamp(16px, 4vw, 56px);
-  --section: clamp(96px, 12vw, 192px);
+  --section: clamp(64px, 7.5vw, 120px);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-io: cubic-bezier(0.7, 0, 0.2, 1);
 
@@ -194,19 +194,28 @@ figcaption, .rail p {
 }
 .hero-media {
   position: absolute;
-  top: -12%;
-  left: 0;
-  width: 100%;
-  height: 125%;
+  inset: 0;
   will-change: transform;
   pointer-events: none;
 }
-.hero-media picture, .hero-media img { width: 100%; height: 100%; display: block; }
-.hero-media img {
+/* Três fotos em fade cruzado. A que está na tela se afasta devagar; a que sai continua o movimento enquanto some. */
+.hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.hero-slide.is-on { opacity: 1; z-index: 1; }
+.hero-slide picture, .hero-slide img { width: 100%; height: 100%; display: block; }
+.hero-slide img {
   object-fit: cover;
-  object-position: 60% 58%;
-  transform-origin: 60% 50%;
+  transform: scale(1.12);
+  transition: transform 8s cubic-bezier(0.2, 0, 0.3, 1);
 }
+.hero-slide.is-on img { transform: scale(1); }
+.hero-slide:nth-child(1) img { object-position: 60% 58%; transform-origin: 62% 50%; }
+.hero-slide:nth-child(2) img { object-position: 50% 52%; transform-origin: 50% 40%; }
+.hero-slide:nth-child(3) img { object-position: 50% 50%; transform-origin: 40% 50%; }
+.hero-dots { display: flex; gap: 8px; margin-bottom: 22px; }
+.hero-dots span { position: relative; width: 28px; height: 2px; background: rgb(242 240 235 / 0.25); overflow: hidden; }
+.hero-dots span::after { content: ""; position: absolute; inset: 0; background: var(--red); transform: scaleX(0); transform-origin: 0 50%; }
+.hero-dots span.is-on::after { animation: dot-fill var(--slide-ms, 5600ms) linear forwards; }
+@keyframes dot-fill { to { transform: scaleX(1); } }
 .hero-shade {
   position: absolute;
   inset: 0;
@@ -232,6 +241,7 @@ figcaption, .rail p {
 .hero-title .line { display: block; padding-bottom: 0.04em; }
 .hero-title .line-in { display: block; }
 .hero-title em, .hero-sub em { font-style: normal; color: var(--red); }
+.hero-title .pt { font-family: var(--f-text); font-weight: 400; }
 .hero-foot {
   display: flex;
   align-items: flex-end;
@@ -374,7 +384,11 @@ figcaption, .rail p {
   gap: 12px;
   margin-top: 12px;
 }
-.bs-wipe, .bs-meter { display: none; }
+.bs-wipe, .bs-meter-track { display: none; }
+/* Sem movimento: chegada (menor) à esquerda, reparo pronto à direita, com os rótulos em cima */
+.bs-before { order: -1; }
+.bs-meter { display: flex; justify-content: space-between; gap: 16px; margin-top: 28px; max-width: 420px; }
+.bs-meter .bs-meter-label { color: var(--fg); }
 
 /* Com movimento: o GSAP trava a seção na tela. A troca só começa depois disso. */
 .has-motion .bs-sticky {
@@ -436,6 +450,9 @@ figcaption, .rail p {
 }
 .has-motion .bs-cap-before { opacity: 1; }
 .has-motion .bs-cap-after { opacity: 0; }
+.has-motion .bs-meter-label { color: var(--muted); }
+.has-motion .bs-meter-label.is-on { color: var(--fg); }
+.has-motion .bs-meter-track { display: block; }
 .has-motion .bs-meter {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -634,7 +651,7 @@ figcaption, .rail p {
 .ct-side { grid-column: 9 / span 4; align-self: end; }
 .ct-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 20px 32px; margin-top: 32px; }
 .ct-info { display: grid; gap: 20px; grid-column: 1 / -1; margin-top: clamp(48px, 6vw, 88px); padding-top: 28px; border-top: 1px solid var(--line); grid-template-columns: repeat(auto-fit, minmax(260px, max-content)); column-gap: 64px; }
-.ct-info a { display: flex; gap: 14px; align-items: flex-start; color: var(--fg-2); line-height: 1.5; transition: color 0.3s linear; }
+.ct-info a { display: flex; gap: 14px; align-items: flex-start; padding-block: 10px; color: var(--fg-2); line-height: 1.5; transition: color 0.3s linear; }
 .ct-info a:hover { color: var(--fg); }
 .ct-info .ic { margin-top: 3px; color: var(--red); }
 
@@ -646,6 +663,11 @@ figcaption, .rail p {
 .foot-nav a, .foot-meta a { transition: color 0.3s linear; }
 .foot-nav a:hover, .foot-meta a:hover { color: var(--fg); }
 .foot-meta { display: grid; gap: 4px; text-align: right; max-width: 32ch; }
+.foot-credit { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 0.75rem; letter-spacing: 0.02em; }
+.foot-credit a { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--muted); transition: color 0.3s linear; }
+.foot-credit a:hover { color: var(--fg); }
+.foot-credit .ic { width: 14px; height: 14px; color: var(--red); }
+.foot-credit strong { font-weight: 600; color: var(--fg-2); }
 
 /* ---------- Dock (celular) ---------- */
 .dock {
@@ -718,14 +740,16 @@ figcaption, .rail p {
 .tile-e a:not(.btn):hover { color: var(--fg); }
 
 .w { display: inline-block; vertical-align: top; }
-.w-in { display: inline-block; will-change: transform, filter, opacity; }
+.w-in { display: inline-block; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
-/* ---------- Estado inicial do movimento (só com .motion; sem JS tudo aparece) ---------- */
+/* ---------- Estado inicial do movimento (só com .motion; sem JS tudo aparece) ----------
+   Os valores batem com o "from" do GSAP para a entrada não dar salto. Desfoque só com .fx (desktop com mouse). */
 .motion .top { opacity: 0; }
-.motion .hero-media img { opacity: 0; filter: blur(30px); transform: scale(1.12); }
-.motion .hero-title .line-in { opacity: 0; filter: blur(16px); transform: translateY(24px); }
-.motion [data-hero-fade] { opacity: 0; filter: blur(10px); transform: translateY(16px); }
+.motion .hero-media { opacity: 0; }
+.motion .hero-title .line-in { opacity: 0; transform: translateY(18px); }
+.motion [data-hero-fade] { opacity: 0; transform: translateY(12px); }
+.motion.fx .hero-title .line-in { filter: blur(10px); }
 
 /* ---------- Responsivo ---------- */
 @media (max-width: 1279px) {
@@ -754,7 +778,10 @@ figcaption, .rail p {
   .idx-arrow { grid-column: 3; grid-row: 1 / span 2; opacity: 1; transform: none; width: 22px; height: 22px; }
 
   .bs-text, .bs-stage { grid-column: 1 / -1; }
-  .has-motion .bs-stage { width: min(86vw, calc(40svh * 1500 / 1840)); justify-self: center; }
+  /* Sem trava no toque (celular e tablet): seção na altura do conteúdo, foto grande, a varredura acompanha a rolagem */
+  .has-motion .bs-sticky { height: auto; align-content: start; padding-block: var(--section); row-gap: 28px; }
+  .has-motion .bs-text { align-self: start; }
+  .has-motion .bs-stage { width: min(100%, 560px); justify-self: start; }
 
   .tr-lead span { white-space: normal; }
 
@@ -771,6 +798,7 @@ figcaption, .rail p {
 }
 
 @media (max-width: 767px) {
+  :root { --section: 56px; }
   html { scroll-padding-top: 16px; }
   .top { position: absolute; }
   .top.is-solid { background: transparent; border-bottom-color: transparent; }
@@ -778,17 +806,20 @@ figcaption, .rail p {
   .brand img { height: 32px; }
   .dock { display: flex; }
 
-  .hero { background: var(--bg); }
-  .hero-media { top: -6%; left: 0; width: 100%; height: calc(min(112vw, 66svh) + 14%); }
-  .hero-media img { object-position: 50% 55%; }
+  /* Celular: foto vertical em tela cheia, texto por cima no degradê. Nada de faixa solta. */
+  .hero-slide img { transform: scale(1.07); }
+  .hero-slide:nth-child(1) img { object-position: 68% 40%; transform-origin: 72% 35%; }
+  .hero-slide:nth-child(2) img { object-position: 42% 50%; transform-origin: 45% 35%; }
+  .hero-slide:nth-child(3) img { object-position: 56% 50%; transform-origin: 60% 30%; }
   .hero-shade {
-    inset: 0 0 auto;
-    height: min(112vw, 66svh);
     background:
-      linear-gradient(to bottom, rgb(9 9 9 / 0.8) 0%, rgb(9 9 9 / 0) 22%),
-      linear-gradient(to top, rgb(9 9 9 / 1) 0%, rgb(9 9 9 / 0.5) 22%, rgb(9 9 9 / 0) 44%);
+      linear-gradient(to bottom, rgb(9 9 9 / 0.75) 0%, rgb(9 9 9 / 0) 18%),
+      linear-gradient(to top, rgb(9 9 9 / 1) 0%, rgb(9 9 9 / 0.92) 26%, rgb(9 9 9 / 0.55) 44%, rgb(9 9 9 / 0) 62%);
   }
-  .hero-body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .hero-dots { margin-bottom: 18px; }
+  /* Só o espaço da barra flutuante, sem sobra: a próxima seção chega logo depois do "Ver serviços" */
+  .hero-body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .std { padding-top: 40px; }
   .hero-foot { flex-direction: column; align-items: flex-start; border-top: 0; padding-top: 0; }
   .hero-actions .btn-red { display: none; } /* o dock já carrega o WhatsApp */
 
@@ -800,31 +831,39 @@ figcaption, .rail p {
   .idx-thumb { width: 64px; height: 64px; }
   .idx-note { font-size: 0.875rem; }
 
-  .has-motion .bs-sticky {
-    padding-top: 28px;
-    padding-bottom: calc(96px + env(safe-area-inset-bottom));
-    row-gap: 18px;
-  }
-  .has-motion .bs-stage { width: min(78vw, calc(34svh * 1500 / 1840)); }
-  .has-motion .bs-text .lead { margin-top: 14px; }
-  .has-motion .bs-meter { margin-top: 18px; gap: 10px; }
+  .has-motion .bs-text .lead { margin-top: 18px; }
+  .has-motion .bs-meter { margin-top: 24px; gap: 10px; max-width: none; }
   .bs-meter-label { letter-spacing: 0.08em; }
 
-  .trucks-band { font-size: clamp(2.7rem, 14vw, 5.5rem); }
+  .trucks { padding-top: 64px; }
+  .trucks-band { font-size: clamp(2.7rem, 14vw, 5.5rem); margin-bottom: 36px; }
+  .trucks-track.is-ghost { display: none; } /* o contorno duplicado vira borrão na tela pequena */
   .tr-lead { margin-top: 16px; }
   .tr-copy .link-arrow { margin-top: 18px; }
-  .tr-photos { gap: 8px; margin-top: 28px; }
+  .tr-photos { grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 32px; }
+  .tr-photos figure:first-child { grid-column: 1 / -1; }
+  .tr-photos figure:first-child img { aspect-ratio: 4 / 3; object-position: 50% 62%; }
 
-  .pr-list { grid-template-columns: 1fr; gap: 64px; }
+  .pr-list { grid-template-columns: 1fr; gap: 48px; }
+  .pr-img { margin-bottom: 20px; }
+  .pr-img img { aspect-ratio: 4 / 3; }
 
   .cu-head { flex-direction: column; align-items: flex-start; }
+  .cu-ctrl { display: none; } /* no celular o trilho desliza com o dedo */
+  .rail { margin-top: 32px; }
   .rail-item { width: 72vw; }
 
-  .ct-media { aspect-ratio: 4 / 3; }
-  .ct-media img { object-position: 22% 50%; }
+  /* Celular: a faixa larga mostrava só o teto. Aproxima na lanterna esquerda. */
+  .ct-media { aspect-ratio: 2 / 1; }
+  .ct-media img { position: absolute; max-width: none; width: 230%; height: auto; left: -24%; bottom: -4%; transform-origin: 35% 70%; }
   .contact { padding-bottom: 72px; }
+  .ct-info { margin-top: 36px; padding-top: 16px; gap: 0; }
 
-  .foot { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+  /* Rodapé no celular: a faixa da Krivo centralizada, com folga acima e longe da barra flutuante */
+  .foot { padding-bottom: calc(132px + env(safe-area-inset-bottom)); }
+  .foot-credit { margin-top: 48px; padding-top: 32px; text-align: center; font-size: 0.8125rem; }
+  .foot-credit a { gap: 8px; min-height: 44px; }
+  .foot-credit .ic { width: 15px; height: 15px; }
 
   .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: minmax(124px, 18vh); }
   .tile { padding: 16px; }
@@ -851,8 +890,3 @@ figcaption, .rail p {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
 
-/* Aceleração de hardware e renderização suave de desfoque */
-.std-portrait img, .std-detail img, .tr-photos img, .ct-media img {
-  will-change: transform, filter, opacity;
-  transform: translateZ(0);
-}
