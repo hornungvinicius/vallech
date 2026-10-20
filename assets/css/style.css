@@ -280,7 +280,7 @@ figcaption, .rail p {
 .std-facts dd { margin-top: 10px; color: var(--muted); font-size: 0.9375rem; }
 .std-portrait { display: none; }
 .std-detail { grid-column: 7 / span 6; grid-row: 1 / span 2; align-self: center; margin: 0; }
-.std-detail img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 55% 48%; }
+.std-detail img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center; }
 
 /* ---------- 03 Índice de serviços ---------- */
 .idx { padding-block: var(--section) calc(var(--section) * 0.8); }
