@@ -195,7 +195,6 @@ figcaption, .rail p {
 .hero-media {
   position: absolute;
   inset: 0;
-  will-change: transform;
   pointer-events: none;
 }
 /* Três fotos em fade cruzado. A que está na tela se afasta devagar; a que sai continua o movimento enquanto some. */
@@ -204,7 +203,7 @@ figcaption, .rail p {
 .hero-slide picture, .hero-slide img { width: 100%; height: 100%; display: block; }
 .hero-slide img {
   object-fit: cover;
-  transform: scale(1.12);
+  transform: scale(1.05); /* zoom curto: ampliar mais que isso borra a foto */
   transition: transform 8s cubic-bezier(0.2, 0, 0.3, 1);
 }
 .hero-slide.is-on img { transform: scale(1); }
@@ -807,7 +806,7 @@ figcaption, .rail p {
   .dock { display: flex; }
 
   /* Celular: foto vertical em tela cheia, texto por cima no degradê. Nada de faixa solta. */
-  .hero-slide img { transform: scale(1.07); }
+  .hero-slide img { transform: scale(1.04); }
   .hero-slide:nth-child(1) img { object-position: 68% 40%; transform-origin: 72% 35%; }
   .hero-slide:nth-child(2) img { object-position: 42% 50%; transform-origin: 45% 35%; }
   .hero-slide:nth-child(3) img { object-position: 56% 50%; transform-origin: 60% 30%; }
